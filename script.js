@@ -1,7 +1,9 @@
 /**
  * Operação Precisão - Tactical Shooter
  * Vanilla JavaScript Engine
+ * Version: V2.1 (Swapped Buttons, Life System, Reload Delay)
  */
+console.log("%c[SYSTEM] Operação Precisão V2.1 Loaded", "color: #00f2ff; font-weight: bold; background: #000; padding: 5px;");
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
