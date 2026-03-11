@@ -51,23 +51,23 @@ canvas {
     background: var(--glass);
     backdrop-filter: blur(10px);
     border: 1px solid var(--border-glass);
-    padding: 15px 25px;
+    padding: 10px 20px;
     border-radius: 4px;
-    min-width: 200px;
+    min-width: 150px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
 }
 
 .label {
-    font-size: 0.7rem;
+    font-size: 0.6rem;
     color: var(--primary);
     letter-spacing: 2px;
-    margin-bottom: 5px;
+    margin-bottom: 2px;
     font-weight: bold;
 }
 
 #ammo, #score, #mission-timer {
     font-family: 'Orbitron', sans-serif;
-    font-size: 1.8rem;
+    font-size: 1.5rem;
     font-weight: bold;
     text-shadow: 0 0 10px var(--primary);
 }
@@ -83,7 +83,7 @@ canvas {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
-    top: -20px;
+    top: 0;
 }
 
 #mission-label {
@@ -114,6 +114,20 @@ canvas {
     color: var(--secondary);
     animation: blink 0.5s infinite alternate;
     margin-top: 5px;
+}
+
+#reloading-bar-container {
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    margin-top: 5px;
+    display: none;
+}
+
+#reloading-bar {
+    width: 0%;
+    height: 100%;
+    background: var(--primary);
 }
 
 .hidden {

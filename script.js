@@ -16,12 +16,16 @@ const reloadPrompt = document.getElementById('reload-prompt');
 // Game Constants
 const MAX_AMMO = 15;
 const MISSION_TIME = 60; // seconds
+const RELOAD_TIME = 1000; // ms
+const DAMAGE_THRESHOLD = 2000; // 2 seconds
 
 // Game State
 let gameState = {
     active: false,
     score: 0,
     ammo: MAX_AMMO,
+    health: 100,
+    reloading: false,
     timeLeft: MISSION_TIME,
     mouse: { x: 0, y: 0 },
     targets: [],
@@ -29,6 +33,11 @@ let gameState = {
     nextSpawn: 0,
     particles: []
 };
+
+// UI Elements
+const healthBar = document.getElementById('health-bar');
+const reloadBarContainer = document.getElementById('reloading-bar-container');
+const reloadBar = document.getElementById('reloading-bar');
 
 // Assets
 const assets = {
@@ -51,16 +60,16 @@ window.addEventListener('mousemove', (e) => {
     gameState.mouse.y = e.clientY;
 });
 
-// Disable context menu for right-click shooting
+// Disable context menu for right-click reloading
 window.addEventListener('contextmenu', (e) => e.preventDefault());
 
 window.addEventListener('mousedown', (e) => {
-    if (!gameState.active) return;
+    if (!gameState.active || gameState.reloading) return;
 
-    if (e.button === 2) { // Right Click - Shoot
+    if (e.button === 0) { // Left Click - Shoot
         shoot();
-    } else if (e.button === 0) { // Left Click - Reload
-        reload();
+    } else if (e.button === 2) { // Right Click - Reload
+        startReload();
     }
 });
 
@@ -70,27 +79,50 @@ function shoot() {
         updateHUD();
         createMuzzleFlash();
         checkHit();
-        // Play shoot sound placeholder
         playSound('shoot');
     } else {
-        // Play empty sound placeholder
         playSound('empty');
         reloadPrompt.classList.remove('hidden');
     }
 }
 
-function reload() {
-    if (gameState.ammo < MAX_AMMO) {
-        gameState.ammo = MAX_AMMO;
-        updateHUD();
-        reloadPrompt.classList.add('hidden');
-        playSound('reload');
+function startReload() {
+    if (gameState.ammo === MAX_AMMO || gameState.reloading) return;
+
+    gameState.reloading = true;
+    reloadBarContainer.style.display = 'block';
+    reloadPrompt.classList.add('hidden');
+    playSound('reload');
+
+    let start = null;
+    function animateReload(timestamp) {
+        if (!start) start = timestamp;
+        let progress = timestamp - start;
+        let percent = Math.min((progress / RELOAD_TIME) * 100, 100);
+        
+        reloadBar.style.width = percent + '%';
+
+        if (progress < RELOAD_TIME) {
+            requestAnimationFrame(animateReload);
+        } else {
+            completeReload();
+        }
     }
+    requestAnimationFrame(animateReload);
+}
+
+function completeReload() {
+    gameState.ammo = MAX_AMMO;
+    gameState.reloading = false;
+    reloadBarContainer.style.display = 'none';
+    reloadBar.style.width = '0%';
+    updateHUD();
 }
 
 function updateHUD() {
     ammoDisplay.innerText = `${gameState.ammo} / ${MAX_AMMO}`;
     scoreDisplay.innerText = gameState.score.toString().padStart(6, '0');
+    healthBar.style.width = gameState.health + '%';
     
     const mins = Math.floor(gameState.timeLeft / 60);
     const secs = Math.floor(gameState.timeLeft % 60);
@@ -133,27 +165,53 @@ class Target {
         this.height = 150;
         this.x = Math.random() * (canvas.width - this.width);
         this.y = Math.random() * (canvas.height - this.height);
-        this.life = 2000; // ms to stay visible
+        this.life = 3500; // ms to stay visible
         this.spawnTime = Date.now();
-        this.isHit = false;
+        this.hasDamagedPlayer = false;
+    }
+
+    update() {
+        const elapsed = Date.now() - this.spawnTime;
+        if (elapsed > DAMAGE_THRESHOLD && !this.hasDamagedPlayer) {
+            takeDamage(20);
+            this.hasDamagedPlayer = true;
+            // Visual feedback for being hit
+            for (let i = 0; i < 20; i++) {
+                gameState.particles.push(new Particle(canvas.width/2, canvas.height/2, '#ff0000', 15, 40));
+            }
+        }
+        return elapsed < this.life;
     }
 
     draw() {
         const elapsed = Date.now() - this.spawnTime;
-        if (elapsed > this.life) return false;
-
+        
+        ctx.save();
+        // Danger indicator
+        if (elapsed > DAMAGE_THRESHOLD) {
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = 'red';
+        }
         ctx.drawImage(assets.target, this.x, this.y, this.width, this.height);
-        return true;
+        ctx.restore();
     }
 
     checkHit(mx, my) {
         if (mx > this.x && mx < this.x + this.width &&
             my > this.y && my < this.y + this.height) {
-            this.isHit = true;
             return true;
         }
         return false;
     }
+}
+
+function takeDamage(amount) {
+    gameState.health -= amount;
+    if (gameState.health <= 0) {
+        gameState.health = 0;
+        endGame("VOCÊ MORREU EM COMBATE");
+    }
+    updateHUD();
 }
 
 function createMuzzleFlash() {
@@ -168,7 +226,6 @@ function checkHit() {
             gameState.score += 100;
             gameState.targets.splice(i, 1);
             playSound('hit');
-            // Impact effect
             for (let j = 0; j < 15; j++) {
                 gameState.particles.push(new Particle(gameState.mouse.x, gameState.mouse.y, '#ff0055', 8, 30));
             }
@@ -213,11 +270,11 @@ function playSound(type) {
     } else if (type === 'reload') {
         osc.type = 'sine';
         osc.frequency.setValueAtTime(400, now);
-        osc.frequency.linearRampToValueAtTime(600, now + 0.1);
+        osc.frequency.linearRampToValueAtTime(600, now + 0.3);
         gain.gain.setValueAtTime(0.05, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
         osc.start();
-        osc.stop(now + 0.3);
+        osc.stop(now + 0.4);
     }
 }
 
@@ -230,14 +287,17 @@ function update(time) {
 
     gameState.timeLeft -= dt;
     if (gameState.timeLeft <= 0) {
-        endGame();
+        endGame("MISSÃO CONCLUÍDA");
     }
 
     // Spawn Logic
     if (time > gameState.nextSpawn) {
         gameState.targets.push(new Target());
-        gameState.nextSpawn = time + 1000 + Math.random() * 2000;
+        gameState.nextSpawn = time + 1200 + Math.random() * 1800;
     }
+
+    // Update Targets & Damage check
+    gameState.targets = gameState.targets.filter(t => t.update());
 
     // Update Particles
     gameState.particles.forEach((p, idx) => {
@@ -257,7 +317,7 @@ function draw() {
     ctx.drawImage(assets.bg, 0, 0, canvas.width, canvas.height);
 
     // Draw Targets
-    gameState.targets = gameState.targets.filter(t => t.draw());
+    gameState.targets.forEach(t => t.draw());
 
     // Draw Particles
     gameState.particles.forEach(p => p.draw());
@@ -267,10 +327,15 @@ function draw() {
     ctx.drawImage(assets.crosshair, gameState.mouse.x - cs/2, gameState.mouse.y - cs/2, cs, cs);
 }
 
-function endGame() {
+function endGame(msg) {
     gameState.active = false;
-    alert(`Missão Finalizada! Score: ${gameState.score}`);
-    location.reload();
+    document.getElementById('overlay-title').innerText = msg;
+    document.getElementById('message-overlay').classList.remove('hidden');
+    
+    // Auto reload start screen after 3s
+    setTimeout(() => {
+        location.reload();
+    }, 3000);
 }
 
 startButton.addEventListener('click', () => {
