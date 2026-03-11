@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Operação Precisão - Tactical Shooter</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+        
+        <div id="hud">
+            <div class="hud-item" id="health-container">
+                <div class="label">STATUS</div>
+                <div id="health-bar-bg"><div id="health-bar"></div></div>
+            </div>
+            
+            <div class="hud-item" id="score-container">
+                <div class="label">PONTUAÇÃO</div>
+                <div id="score">000000</div>
+            </div>
+            
+            <div class="hud-center">
+                <div id="mission-timer">00:00</div>
+                <div id="mission-label">MISSÃO EM CURSO</div>
+            </div>
+            
+            <div class="hud-item" id="ammo-container">
+                <div class="label">MUNIÇÃO</div>
+                <div id="ammo">15 / 15</div>
+                <div id="reload-prompt" class="hidden">RECARREGAR (MB1)</div>
+            </div>
+        </div>
+
+        <div id="message-overlay" class="hidden">
+            <h1 id="overlay-title">MISSÃO FALHOU</h1>
+            <p id="overlay-subtitle">Pressione R para reiniciar</p>
+        </div>
+
+        <div id="start-screen">
+            <h1 class="glitch" data-text="OPERAÇÃO PRECISÃO">OPERAÇÃO PRECISÃO</h1>
+            <p>MB1: RECARREGAR | MB2: ATIRAR</p>
+            <button id="start-button">INICIAR MISSÃO</button>
+        </div>
+    </div>
+
+    <!-- Preload Assets -->
+    <div style="display:none;">
+        <img id="asset-bg" src="assets/background.png">
+        <img id="asset-target" src="assets/target.png">
+        <img id="asset-crosshair" src="assets/crosshair.png">
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

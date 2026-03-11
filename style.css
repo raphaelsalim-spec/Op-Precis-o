@@ -1,0 +1,180 @@
+:root {
+    --primary: #00f2ff;
+    --secondary: #ff0055;
+    --bg-dark: #0a0a0c;
+    --glass: rgba(10, 10, 12, 0.8);
+    --border-glass: rgba(0, 242, 255, 0.2);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    cursor: none; /* Hide cursor for custom crosshair */
+}
+
+body {
+    background-color: var(--bg-dark);
+    font-family: 'Inter', sans-serif;
+    color: #fff;
+    overflow: hidden;
+    user-select: none;
+}
+
+#game-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+canvas {
+    display: block;
+    background-color: #000;
+}
+
+#hud {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.hud-item {
+    background: var(--glass);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-glass);
+    padding: 15px 25px;
+    border-radius: 4px;
+    min-width: 200px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.label {
+    font-size: 0.7rem;
+    color: var(--primary);
+    letter-spacing: 2px;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+#ammo, #score, #mission-timer {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.8rem;
+    font-weight: bold;
+    text-shadow: 0 0 10px var(--primary);
+}
+
+.hud-center {
+    text-align: center;
+    background: var(--glass);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-glass);
+    padding: 10px 40px;
+    border-radius: 0 0 20px 20px;
+    border-top: none;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: -20px;
+}
+
+#mission-label {
+    font-size: 0.6rem;
+    color: var(--primary);
+    letter-spacing: 3px;
+    margin-top: 5px;
+}
+
+#health-bar-bg {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+#health-bar {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), #00ff88);
+    transition: width 0.3s ease;
+}
+
+#reload-prompt {
+    font-size: 0.8rem;
+    color: var(--secondary);
+    animation: blink 0.5s infinite alternate;
+    margin-top: 5px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+#message-overlay, #start-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    backdrop-filter: blur(5px);
+}
+
+#start-screen h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 4rem;
+    margin-bottom: 20px;
+    text-shadow: 0 0 30px var(--primary);
+}
+
+#start-screen p {
+    font-size: 1rem;
+    letter-spacing: 5px;
+    margin-bottom: 40px;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+#start-button {
+    background: transparent;
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    padding: 15px 50px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+}
+
+#start-button:hover {
+    background: var(--primary);
+    color: var(--bg-dark);
+    box-shadow: 0 0 30px var(--primary);
+}
+
+@keyframes blink {
+    from { opacity: 1; }
+    to { opacity: 0.2; }
+}
+
+/* Glitch Effect placeholder */
+.glitch {
+    position: relative;
+    color: white;
+}
